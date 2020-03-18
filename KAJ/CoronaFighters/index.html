@@ -8,12 +8,19 @@
     <div id="menu">
         <button id="new-game">New Game</button>
         <button id="restart">Restart</button>
+        <label for="username">Username:
+            <input type="text" name="username" id="username">
+        </label>
+        <button id="set-username">Set Username</button>
     </div>
     <div id="information">
         <p>Score: <span id="score">0</span> | Viruses Eliminated: <span id="eliminated">0</span> | Viruses Missed: <span id="missed">0</span></p>
+        <h4>Press key: <span id="press-key"></span></h4>
     </div>
 
-    <canvas id="game-area">You must have JavaScript enabled to be able to play.</canvas>
+    <div id="game-area">
+        <canvas id="world-area">You must have JavaScript enabled to be able to play.</canvas>
+    </div>
 
     <script src="coronaFighters.js"></script>
 </body>
