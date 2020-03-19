@@ -52,7 +52,9 @@ class World {
     }
 
     /**
-     * Moves the red overlay of the world
+     * Moves the red overlay of the world on the canvas
+     * 
+     * @returns Boolean - whether the world has been filled or not
      */
     moveCover() {
         this.ctx.clearRect(0, 0, this.filled, this.height);
@@ -82,13 +84,7 @@ class World {
      * Resets the game area to the initial state
      */
     reset() {
-        this.ctx.clearRect(0, 0, this.filled, this.height);
-        this.filled = 0;
-        this.ctx.beginPath();
-        this.ctx.rect(0, 0, this.filled, this.height);
-        this.ctx.fillStyle = this.fillStyle;
-
-        this.ctx.fill();
+        this.ctx.clearRect(0, 0, this.worldArea.width, this.worldArea.height);
     }
 
     /**
@@ -117,8 +113,10 @@ class Virus {
         this.sprite.width = width;
         this.sprite.style.position = 'absolute';
         this.points = points;
+
         this.parentElement = null;
         this.timeoutId = null;
+
         this.key = null;
         this.keys = 'ABCDEFGHKIJKLMNOPQRSTUVWXYZ';
 
@@ -126,7 +124,7 @@ class Virus {
     }
 
     /**
-     * 
+     * Spawns the virus on the specified coordinates and starts expiration timeout
      * @param {int} x - x position
      * @param {int} y - y position
      * @param {HTML Element} targetElement 
@@ -168,6 +166,10 @@ class Virus {
         this.parentElement.dispatchEvent(event);
     }
 
+    /**
+     * Checks if pressed key is the key of the virus
+     * @param {Event} event - KeyDown event
+     */
     handleKeyDown(event) {
         if (this.timeoutId != null) {
             if (event.key.toUpperCase() == this.key) {
@@ -179,27 +181,30 @@ class Virus {
 
 class Player {
     /**
-     * 
+     * Creates the Player class
      */
     constructor() {
         this.ready = false;
         this.score = 0;
         this.name = null;
 
-        document.getElementById('set-username').addEventListener('click', () => this.name = document.getElementById('username').value);
+        document.getElementById('set-username').addEventListener('click', this.setName.bind(this));
     }
 
     /**
-     * 
+     * Sets the name of the player and enables the game to starts
      * @param {String} name 
      */
     setName(name) {
-        this.name = name;
+        this.name = document.getElementById('username').value;
         this.ready = true;
+
+        document.getElementById('new-game').disabled = false;
+        document.getElementById('restart').disabled = false;
     }
 
     /**
-     * 
+     * Updates the player score
      * @param {int} value 
      */
     changeScore(value = 1) {
@@ -207,14 +212,22 @@ class Player {
     }
 
     /**
-     * 
+     * Resets player to initial state
      */
     reset() {
         this.score = 0;
+        this.name = null;
+        document.getElementById('new-game').disabled = true;
+        document.getElementById('restart').disabled = true;
     }
 }
 
 class Game {
+    /**
+     * Creates the Game with specified World and Player
+     * @param {World} world 
+     * @param {Player} player 
+     */
     constructor(world, player) {
         this.eliminated = 0;
         this.missed = 0;
@@ -231,24 +244,42 @@ class Game {
         document.getElementById('new-game').addEventListener('click', this.checkStart.bind(this));
     }
 
+    /**
+     * Updates values displayed to the player
+     */
     updateDisplay() {
         document.getElementById('score').innerText = this.player.score;
         document.getElementById('eliminated').innerText = this.eliminated;
         document.getElementById('missed').innerText = this.missed;
     }
 
+    /**
+     * Sets the Virus
+     * @param {Virus} virus 
+     */
     setVirus(virus) {
         this.virus = virus;
     }
 
+    /**
+     * Sets the bonus Virus
+     * @param {Virus} bonus 
+     */
     setBonus(bonus) {
         this.bonus = bonus;
     }
 
+    /**
+     * Starts the game by spawning enemies
+     */
     startGame() {
         this.intervalId = setInterval(this.spawnEnemy.bind(this), 2000);
     }
 
+    /**
+     * Handles a Virus being shot down
+     * @param {virusDown Event} event 
+     */
     handleDown(event) {
         ++this.eliminated;
         this.player.changeScore(parseInt(event.detail.points));
@@ -257,6 +288,10 @@ class Game {
         event.srcElement.children[1].remove();
     }
 
+    /**
+     * Handles a Virus expiring
+     * @param {virusExpired Event} event 
+     */
     handleExpire(event) {
         if (event.srcElement.children[1] != null) {
             ++this.missed;
@@ -273,6 +308,9 @@ class Game {
         }
     }
 
+    /**
+     * Spawns an enemy
+     */
     spawnEnemy() {
         let seed = Math.random();
 
@@ -284,10 +322,16 @@ class Game {
         }
     }
 
+    /**
+     * Stops the game
+     */
     gameOver() {
         this.world.write('Game Over, ' + player.name);
     }
 
+    /**
+     * Resets the game with inital values
+     */
     restart() {
         this.eliminated = 0;
         this.player.score = 0;
@@ -298,10 +342,11 @@ class Game {
         this.world.reset();
         this.player.reset();
         this.updateDisplay();
-
-        this.startGame();
     }
 
+    /**
+     * Checks if a start is possible
+     */
     checkStart() {
         if (this.virus != null && this.bonus != null && player.name != null) {
             this.startGame();
@@ -313,6 +358,10 @@ class Game {
     }
 }
 
+/**
+ * Loads an image with Promise from an url
+ * @param {String} url 
+ */
 function loadImage(url) {
     return new Promise((resolve, reject) => {
         let img = new Image();
