@@ -37,7 +37,7 @@ async function requestFetch(url) {
  * Creates a websocket and listener for input
  */
 function createChatSocket() {
-    let socket = new WebSocket('ws://salty-peak-74076.herokuapp.com/');
+    let socket = new WebSocket('wss://salty-peak-74076.herokuapp.com/');
 
     socket.addEventListener('message', (message) => {
         let chatElement = document.getElementById('chat');
