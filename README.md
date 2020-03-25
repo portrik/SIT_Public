@@ -1,6 +1,6 @@
 # Hello there!
 
-This is a public repository of my school projects at CTU FEL
+This is a public repository of my school projects at CTU FEE
 
 ## List of projects hosted here
 
