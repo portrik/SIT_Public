@@ -7,3 +7,4 @@ This is a public repository of my school projects at CTU FEL
 ### KAJ
 
 * [Corona Fighters](/KAJ/CoronaFighters/index.html)
+* [Cviceni05](/KAJ/cviceno05/index.html)
