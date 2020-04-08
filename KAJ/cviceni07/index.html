@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Lecture 07</title>
+
+    <style>
+        /*
+            Flexbox cheat-sheet
+                https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+        */
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .page header {
+            display: flex;
+            height: 200px;
+            width: 100%;
+            background: lightblue;
+            margin: 0;
+            padding: 0;
+            align-items: center;
+            justify-content: center;
+        }
+        .page section {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 400px;
+            display: flex;
+        }
+        .page section nav {
+            background: lightsalmon;
+            padding: 1em;
+            white-space: nowrap;
+        }
+        .page section main {
+            display: flex;
+            background: lightgreen;
+            padding: 1em;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .page section main .images {
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: center;
+            align-items: center;
+            align-content: center;
+            flex-grow: 1;
+        }
+        .page section main .images img {
+            margin: 10px;
+        }
+        .page section aside {
+            background: lightgoldenrodyellow;
+            padding: 1em;
+            width: 200px;
+            box-sizing: border-box;
+        }
+        .page footer {
+            display: flex;
+            background: lightcoral;
+            width: 100%;
+            height: 200px;
+            align-self: flex-end;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /*
+            Phone/Mobile styles
+            - Hide side menu
+            - Change order - put content before main menu only with CSS
+            - Switch from column layout (main menu | content | side menu) to row layout
+        */
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        <header>
+            Header
+        </header>
+        <section>
+            <!--
+                - height is the rest of the page (viewport height - header - footer)
+                  or more if there is lots of content inside
+            -->
+            <nav>
+                Main menu
+            </nav>
+            <main>
+                <!--
+                    - 1em padding
+                    - width the rest
+                    - height the rest
+                -->
+                <h1>Page content</h1>
+
+                <div class="images">
+                    <!--
+                        - align images horizontally and vertically
+                    -->
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                    <img src="http://satyr.io/100x100/white" width="100" height="100">
+                </div>
+            </main>
+            <aside>
+                <!--
+                    - 1em padding
+                    - 200px width including the 1em padding
+                    - height the rest
+                -->
+                Side menu
+            </aside>
+        </section>
+        <footer>
+            <!--
+                - footer is sticky
+                - center content horizontally and vertically
+            -->
+            Footer
+        </footer>
+    </div>
+
+</body>
+</html>
