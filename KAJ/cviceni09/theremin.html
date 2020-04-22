@@ -1,0 +1,63 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theremin</title>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li>
+                <a href="./index.html" rel="noopener noreferrer">Index</a>
+            </li>
+        </ul>
+    </nav>
+
+    <main>
+        <h1>
+            Theremin
+        </h1>
+        <p id="warning">Click on the window to start</p>
+    </main>
+
+    <script>
+        var oscillator;
+        var gain;
+
+        window.addEventListener('click', init);
+
+        function init() {
+            let warning = document.getElementById('warning');
+            warning.parentElement.removeChild(warning);
+
+            let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            oscillator = audioContext.createOscillator();
+            gain = audioContext.createGain();
+
+            oscillator.connect(gain);
+            gain.connect(audioContext.destination);
+
+            oscillator.detune.value = 100;
+            oscillator.frequency.value = 3000;
+            oscillator.start(0);
+
+            gain.gain.value = 0.01;
+            
+            window.addEventListener('mousemove', handleMouse);
+        }
+
+        function handleMouse(event) {
+            let x = event.clientX;
+            let y = event.clientY;
+            let w = window.innerWidth;
+            let h = window.innerHeight;
+
+            oscillator.frequency.value = (x/w) * 6000;
+            gain.gain.value = (y/h) * 0.02;
+        }
+    </script>
+</body>
+
+</html>
