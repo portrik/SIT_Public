@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Shooter</title>
+	</head>
+	<style media="screen">
+		canvas {
+			background: #efefef;
+			border: 3px groove black;
+			box-shadow: 2px 2px 3px #a0a0a0;
+			cursor: crosshair;
+		}
+	</style>
+	<body>
+		<h2 id="loading">Please wait, the game is loading.</h2>
+		<canvas width="800" height="800"></canvas>
+		<script type="text/javascript">
+			/*
+				1. study
+					- CheatSheet https://simon.html5.org/dump/html5-canvas-cheat-sheet.html
+					- MDN Canvas https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
+
+				2. create shooter game
+					- draw background
+					- start drawing with request animation frame
+					- use ships array and render ships to canvas
+					- make them moving from bottom to top with various speed
+					- when they fly out of the screen, reposition them to the bottom
+					- add event listener to catch mouse click position
+					- calculate if ship was clicked
+					- destroy ship with click
+					- add sounds
+			*/
+
+			// global config
+			const SPEEDMULTIPLIER = 0.1;
+
+			// some constanst
+			const canvas = document.querySelector('canvas');
+			const ctx = canvas.getContext('2d');
+			const WIDTH = canvas.offsetWidth;
+			const HEIGHT = canvas.offsetHeight;
+
+			const background = new Image();
+            background.src = './media/space.jpg';
+			background.onload = () => assetsLoaded[0] = true;
+
+			const shipSprite = new Image();
+			shipSprite.src = './media/spaceship_sprite.png';
+			shipSprite.onload = () => assetsLoaded[1] = true;
+
+			const missSound = new Audio('./media/miss.mp3');
+			missSound.oncanplaythrough = () => assetsLoaded[2] = true;
+
+			const explosionSound = new Audio('./media/explosion.mp3');
+			explosionSound.oncanplaythrough = () => assetsLoaded[3] = true;
+
+			let assetsLoaded = [
+				false,
+				false,
+				false,
+				false
+			];
+
+			// game state
+			let ships = [
+				{ x: 30, y:HEIGHT, speed: 1.0 },
+				{ x: 80, y:HEIGHT, speed: 0.5 },
+				{ x:150, y:HEIGHT, speed: 0.3 },
+				{ x:200, y:HEIGHT, speed: 0.6 },
+				{ x:300, y:HEIGHT, speed: 0.8 },
+				{ x:450, y:HEIGHT, speed: 2.0 },
+				{ x:600, y:HEIGHT, speed: 1.0 },
+				{ x:700, y:HEIGHT, speed: 0.3 },
+				{ x:800, y:HEIGHT, speed: 1.5 }
+			];
+
+			let tms = null;
+
+			function drawBackground() {
+				ctx.drawImage(background, 0, 0);
+			}
+
+			function drawShip(ship, drawTime, timestamp) {
+				if (ship.y < -shipSprite.height) {
+					ship.y = HEIGHT;
+				}
+				else {
+					ship.y -= drawTime * ship.speed * SPEEDMULTIPLIER;
+				}
+
+				ship.x += Math.sin(timestamp / 300) * ship.speed;
+
+				ctx.drawImage(shipSprite, ship.x, ship.y);
+			}
+
+			function drawFrame(timestamp) {
+				if (!tms) {
+					tms = timestamp;
+				}
+
+				let drawTime = timestamp - tms;
+				tms = timestamp;
+
+				ctx.clearRect(0, 0, WIDTH, HEIGHT);
+				drawBackground();
+
+				ships.forEach(ship => {
+					drawShip(ship, drawTime, tms);
+				});
+
+				requestAnimationFrame(drawFrame);
+			}
+
+			function handleClick(event) {
+				missSound.pause();
+				missSound.currentTime = 0;
+
+				explosionSound.pause();
+				explosionSound.currentTime = 0;
+
+				let x = event.offsetX;
+				let y = event.offsetY;
+				let hit = false;
+
+				ships = ships.filter(ship => {
+					if ((x >= ship.x && x <= ship.x + shipSprite.width) && (y >= ship.y && y <= ship.y + shipSprite.height)) {
+						hit = true;
+						return false;
+					}
+					else {
+						return true;
+					}
+				});
+
+				if (hit) {
+					explosionSound.play();
+				}
+				else {
+					missSound.play();
+				}
+			}
+
+			function checkLoaded() {
+				let tmp = assetsLoaded.filter(item => {
+					return !item;
+				});
+
+				if (tmp.length > 0) {
+					setTimeout(checkLoaded, 500);
+				}
+				else {
+					let loading = document.getElementById('loading');
+					loading.parentElement.removeChild(loading);
+					canvas.addEventListener('click', handleClick);
+					requestAnimationFrame(drawFrame);
+				}
+			}
+
+			setTimeout(checkLoaded, 500);
+		</script>
+	</body>
+</html>
