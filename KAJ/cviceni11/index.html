@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Lecture 11</title>
+
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+			}
+			section {
+				display: none;
+			}
+			section.is-visible {
+				display: block;
+			}
+			#dnd {
+				height:70px;
+				border-radius: 50px;
+				border: 2px dotted #a0a0a0;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			#dnd::before {
+				content: "D'n'D here!";
+				color: #2e2e2e;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h1>My cool app</h1>
+
+		<nav>
+			<ul>
+				<li><a href="#accesslog">Log</a></li>
+				<li><a href="#imageinfo">Image Info</a></li>
+			</ul>
+		</nav>
+
+		<hr>
+
+		<section data-route="#accesslog">
+			<h2>Log</h2>
+
+			<h2>History entries</h2>
+			<ul id="history-entries"></ul>
+		</section>
+
+		<section data-route="#imageinfo">
+			<h2>Image Info</h2>
+
+			<div id="dnd"></div>
+			<ul id="imgInfo"></ul>
+			<div id="imgCnt"></div>
+		</section>
+
+
+		<script type="text/javascript">
+			/*
+				LocalStorage
+					https://developer.mozilla.org/en/docs/Web/API/Window/localStorage
+
+				History API
+					https://developer.mozilla.org/en-US/docs/Web/API/History_API
+
+				File API
+					https://developer.mozilla.org/en-US/docs/Web/API/File
+
+				Filereader API
+					https://developer.mozilla.org/en-US/docs/Web/API/FileReader
+
+				Drag'n'Drop API
+					https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API
+
+			*/
+
+			/*
+				1. Routing
+					- There will be two pages, each of them is already in the HTML as sections with data-route attribute
+					- Hide these pages by default with css or javascript
+					- Look at URL and decide which page to display, by default show the "accesslog" page
+						Look at History API link
+					- Re-render when browser URL changes, either by user clicking on link or by pressing browsers back/forward button
+						Look at popstate event on window and use addEventListener to listen on that event
+				3. File API and Drag'n'Drop
+					- On second page use Drag and Drop API so user can drag and drop image to the rectangle
+					- When user drops image, use File Reader API to read and display name, size and type of image
+            */
+
+            class MyApp {
+                constructor() {
+                    this.handleUrl();
+                    window.addEventListener('hashchange', this.handleUrl);
+
+                    this.handleHistoryUpdate();
+                    
+                    const dnd = document.getElementById('dnd');
+                    dnd.addEventListener('drop', (event) => this.handleDrop(event));
+                    dnd.addEventListener('dragover', event => event.preventDefault());
+                }
+
+                handleUrl() {
+                    let hash = new URL(window.location).hash;
+
+                    if (!hash || hash === '#accesslog') {
+                        document.querySelector('[data-route="#accesslog"]').classList.add('is-visible');
+                        document.querySelector('[data-route="#imageinfo"').classList.remove('is-visible');
+                    } else if (hash === '#imageinfo') {
+                        document.querySelector('[data-route="#imageinfo"]').classList.add('is-visible');
+                        document.querySelector('[data-route="#accesslog"]').classList.remove('is-visible');
+                    }
+                }
+
+                handleHistoryUpdate() {
+                    let history = window.localStorage.getItem('history');
+
+                    if (!history) {
+                        history = {};
+                        history['timestamps'] = [];
+                    }
+                    else {
+                        history = JSON.parse(history);
+                    }
+
+                    history['timestamps'].push(Date.now());
+
+                    window.localStorage.setItem('history', JSON.stringify(history));
+
+                    const targetElement = document.getElementById('history-entries');
+
+                    history['timestamps'].forEach(stamp => {
+                        let newStamp = document.createElement('li');
+                        newStamp.innerText = Date(stamp).toString();
+
+                        targetElement.appendChild(newStamp);
+                    });
+                }
+
+                handleDrop(event) {
+                    event.preventDefault();
+                    const files = event.dataTransfer.files;
+                    
+                    const imgCnt = document.getElementById('imgCnt');
+                    const imgInfo = document.getElementById('imgInfo');
+
+                    for (const file of files) {
+                        if (file.type.indexOf('image') != -1) {
+                            const reader = new FileReader();
+
+                            reader.addEventListener('load', e => {
+                                const img = new Image();
+                                img.addEventListener('load', e => {
+                                    img.width = Math.min(img.naturalWidth, window.innerHeight - 50);
+                                });
+
+                                img.src = reader.result;
+                                imgCnt.appendChild(img);
+
+                                const info = document.createElement('li');
+                                info.innerText = 'type: ' + file.type + '\nsize: ' + file.size + '\nname: ' + file.name;
+                                imgInfo.appendChild(info);
+                            });
+
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                }
+            }
+
+
+			// run
+			new MyApp();
+
+		</script>
+	</body>
+</html>
